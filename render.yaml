@@ -1,0 +1,24 @@
+databases:
+  - name: meal-planner-db
+    plan: free
+    databaseName: meals
+    user: meals_user
+
+services:
+  - type: web
+    name: meal-planner
+    runtime: docker
+    plan: free
+    envVars:
+      - key: MEAL_DATABASE_URL
+        fromDatabase:
+          name: meal-planner-db
+          property: connectionString
+        # Render gives postgres:// but SQLAlchemy needs postgresql+asyncpg://
+        # We handle this in config.py
+      - key: MEAL_SECRET_KEY
+        generateValue: true
+      - key: MEAL_HOUSEHOLD_PIN
+        sync: false
+      - key: MEAL_USER_NAMES
+        value: '["Abhishek", "Richa"]'

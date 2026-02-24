@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#4f46e5">
+  <title>Meal Planner</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <link rel="stylesheet" href="/static/style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js');
+    }
+  </script>
+</head>
+<body x-data="app" x-init="init()">
+
+  <!-- LOGIN SCREEN -->
+  <div x-show="view === 'login'" class="screen login-screen">
+    <div class="login-card">
+      <h1>Meal Planner</h1>
+      <p class="subtitle">Enter your household PIN</p>
+      <input
+        type="password"
+        inputmode="numeric"
+        maxlength="6"
+        placeholder="PIN"
+        x-model="pin"
+        @keyup.enter="login()"
+        class="pin-input"
+      >
+      <div class="user-buttons" x-show="users.length">
+        <template x-for="u in users" :key="u.id">
+          <button
+            class="user-btn"
+            :class="{ active: selectedUser === u.name }"
+            @click="selectedUser = u.name"
+            x-text="u.name"
+          ></button>
+        </template>
+      </div>
+      <button class="btn-primary" @click="login()" :disabled="!pin || !selectedUser">
+        Login
+      </button>
+      <p class="error" x-show="loginError" x-text="loginError"></p>
+    </div>
+  </div>
+
+  <!-- WEEK VIEW -->
+  <div x-show="view === 'week'" class="screen">
+    <header class="top-bar">
+      <button class="icon-btn" @click="changeWeek(-1)">&larr;</button>
+      <h2 x-text="weekLabel"></h2>
+      <button class="icon-btn" @click="changeWeek(1)">&rarr;</button>
+    </header>
+    <div class="day-list">
+      <template x-for="day in weekDays" :key="day.date">
+        <div
+          class="day-card"
+          :class="{ today: day.isToday }"
+          @click="openDay(day.date)"
+        >
+          <div class="day-card-left">
+            <span class="day-name" x-text="day.dayName"></span>
+            <span class="day-date" x-text="day.dateLabel"></span>
+          </div>
+          <div class="day-card-right">
+            <span class="meal-count" x-text="day.mealSummary"></span>
+            <span class="chevron">&rsaquo;</span>
+          </div>
+        </div>
+      </template>
+    </div>
+    <div class="user-pill" x-text="userName"></div>
+  </div>
+
+  <!-- DAY DETAIL -->
+  <div x-show="view === 'day'" class="screen">
+    <header class="top-bar">
+      <button class="icon-btn" @click="view = 'week'">&larr;</button>
+      <h2 x-text="selectedDayLabel"></h2>
+      <div style="width:40px"></div>
+    </header>
+    <div class="meal-sections">
+      <template x-for="mt in mealTimes" :key="mt.key">
+        <div class="meal-section">
+          <h3 class="meal-time-label" x-text="mt.label"></h3>
+          <template x-for="meal in getMealsFor(mt.key)" :key="meal.id">
+            <div class="meal-item">
+              <div class="meal-info">
+                <span class="meal-name" x-text="meal.name"></span>
+                <span class="meal-portion" x-text="meal.portion"></span>
+                <span class="meal-by" x-text="'by ' + (meal.added_by_name || '')"></span>
+              </div>
+              <div class="meal-actions">
+                <button class="icon-btn small" @click="editMeal(meal)">&#9998;</button>
+                <button class="icon-btn small danger" @click="deleteMeal(meal.id)">&#10005;</button>
+              </div>
+            </div>
+          </template>
+          <div x-show="getMealsFor(mt.key).length === 0" class="no-meal">No meal added</div>
+        </div>
+      </template>
+    </div>
+    <button class="fab" @click="openAddMeal()">+ Add Meal</button>
+  </div>
+
+  <!-- ADD/EDIT BOTTOM SHEET -->
+  <div class="overlay" x-show="showSheet" @click.self="showSheet = false" x-transition.opacity>
+    <div class="bottom-sheet" x-show="showSheet" x-transition:enter="sheet-enter" x-transition:leave="sheet-leave">
+      <div class="sheet-handle"></div>
+      <h3 x-text="editingMeal ? 'Edit Meal' : 'Add Meal'"></h3>
+      <label>Meal name</label>
+      <input type="text" x-model="form.name" placeholder="e.g. Dal Rice">
+      <label>Portion</label>
+      <input type="text" x-model="form.portion" placeholder="e.g. 1 bowl, 200g">
+      <label>Day</label>
+      <input type="date" x-model="form.date">
+      <label>When</label>
+      <select x-model="form.meal_time">
+        <template x-for="mt in mealTimes" :key="mt.key">
+          <option :value="mt.key" x-text="mt.label"></option>
+        </template>
+      </select>
+      <button class="btn-primary" @click="saveMeal()" :disabled="!form.name">Save</button>
+    </div>
+  </div>
+
+</body>
+</html>
