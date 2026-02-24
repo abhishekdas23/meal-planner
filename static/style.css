@@ -168,6 +168,29 @@ body {
   color: var(--danger);
 }
 
+/* WEEK SUMMARY */
+.week-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 10px 16px;
+  background: var(--today);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.summary-dot {
+  opacity: 0.4;
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
 /* DAY CARDS */
 .day-list {
   padding: 0 16px;

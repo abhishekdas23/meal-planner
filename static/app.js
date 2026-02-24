@@ -138,6 +138,21 @@ document.addEventListener('alpine:init', () => {
       return days;
     },
 
+    get weekSummary() {
+      if (!this.weekStart || this.meals.length === 0) return null;
+      const totalMeals = this.meals.length;
+      let fullDays = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(this.weekStart);
+        d.setDate(d.getDate() + i);
+        const iso = this.toISO(d);
+        const dayMeals = this.meals.filter(m => m.date === iso);
+        const filledSlots = new Set(dayMeals.map(m => m.meal_time)).size;
+        if (filledSlots === 5) fullDays++;
+      }
+      return { totalMeals, fullDays };
+    },
+
     toISO(d) {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');

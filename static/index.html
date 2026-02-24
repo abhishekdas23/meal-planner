@@ -58,6 +58,11 @@
       <h2 x-text="weekLabel"></h2>
       <button class="icon-btn" @click="changeWeek(1)">&rarr;</button>
     </header>
+    <div class="week-summary" x-show="weekSummary" x-cloak>
+      <span class="summary-meals" x-text="weekSummary ? weekSummary.totalMeals + ' meals logged' : ''"></span>
+      <span class="summary-dot">&middot;</span>
+      <span class="summary-days" x-text="weekSummary ? weekSummary.fullDays + '/7 days complete' : ''"></span>
+    </div>
     <div class="day-list">
       <template x-for="day in weekDays" :key="day.date">
         <div
