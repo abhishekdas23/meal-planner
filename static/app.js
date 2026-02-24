@@ -174,6 +174,29 @@ document.addEventListener('alpine:init', () => {
       } catch (e) { /* ignore */ }
     },
 
+    // Week summary detail
+    get summaryDays() {
+      if (!this.weekStart) return [];
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(this.weekStart);
+        d.setDate(d.getDate() + i);
+        const iso = this.toISO(d);
+        const dayMeals = this.meals.filter(m => m.date === iso);
+        if (dayMeals.length === 0) continue;
+        const grouped = {};
+        for (const mt of this.mealTimes) {
+          const items = dayMeals.filter(m => m.meal_time === mt.key);
+          if (items.length > 0) grouped[mt.label] = items;
+        }
+        days.push({
+          label: d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' }),
+          groups: grouped,
+        });
+      }
+      return days;
+    },
+
     // Navigation
     openDay(date) {
       this.selectedDate = date;

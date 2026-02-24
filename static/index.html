@@ -58,10 +58,11 @@
       <h2 x-text="weekLabel"></h2>
       <button class="icon-btn" @click="changeWeek(1)">&rarr;</button>
     </header>
-    <div class="week-summary" x-show="weekSummary" x-cloak>
+    <div class="week-summary" x-show="weekSummary" x-cloak @click="view = 'summary'">
       <span class="summary-meals" x-text="weekSummary ? weekSummary.totalMeals + ' meals logged' : ''"></span>
       <span class="summary-dot">&middot;</span>
       <span class="summary-days" x-text="weekSummary ? weekSummary.fullDays + '/7 days complete' : ''"></span>
+      <span class="chevron">&rsaquo;</span>
     </div>
     <div class="day-list">
       <template x-for="day in weekDays" :key="day.date">
@@ -113,6 +114,34 @@
       </template>
     </div>
     <button class="fab" @click="openAddMeal()">+ Add Meal</button>
+  </div>
+
+  <!-- WEEKLY SUMMARY DETAIL -->
+  <div x-show="view === 'summary'" class="screen">
+    <header class="top-bar">
+      <button class="icon-btn" @click="view = 'week'">&larr;</button>
+      <h2 x-text="weekLabel + ' Summary'"></h2>
+      <div style="width:40px"></div>
+    </header>
+    <div class="summary-detail">
+      <template x-for="day in summaryDays" :key="day.label">
+        <div class="summary-day">
+          <h3 class="summary-day-label" x-text="day.label"></h3>
+          <template x-for="(items, mealTime) in day.groups" :key="mealTime">
+            <div class="summary-group">
+              <span class="summary-meal-time" x-text="mealTime"></span>
+              <template x-for="meal in items" :key="meal.id">
+                <div class="summary-meal-item">
+                  <span class="meal-name" x-text="meal.name"></span>
+                  <span class="meal-portion" x-text="meal.portion"></span>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </template>
+      <div x-show="summaryDays.length === 0" class="no-meal" style="padding: 16px;">No meals logged this week</div>
+    </div>
   </div>
 
   <!-- ADD/EDIT BOTTOM SHEET -->
